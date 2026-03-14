@@ -49,4 +49,4 @@ It wrote the code, ran away, and now the game is unplayable.
 
 ## 📸 Demo
 
-- [App Screenshot](screenshot-win.png)
+- ![App Screenshot](screenshot-win.png)
