@@ -12,8 +12,12 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
   - New game button is not creating a new game to start over (Expected it to clear the input and reset the game but it does not do anything)
   - Normal level has range 1-100 while Hard level has range 1-50 (does not really make sense as it would be expected for hard mode to be 1-100 and normal to be 1-50)
   - Easy mode range is 1-20 but the secret number was 44 (does not make sense again as the number should stay within the range of 1-20)
+  - Message at top always says "Guess a number between 1 and 100" regardless of level chosen
   - Game ended after certain number of attempts but still says I have one attempt remaining (not counting first attempt as an attempt)
     - Reveals secret number even if one attempt is still left + submitting that last attempt (to make it 0) reveals a 'Game Over' message
+    - First guess is not counting as attempt 1
+    - Attempts only counts every other attempt unless "Submit Guess" button is clicked multiple times after one input has been given (Expected to count every guess as an attempt)
+  - Guessing a number that is "Too High" rewards points instead of subtracting on every other "Too High" guess
 
 ---
 
@@ -22,7 +26,8 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 - Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)?
 - Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
 - Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).
-
+  - Had some trouble fixing the bug of the attempts --> first guess was still not counting as one attempt
+  - Gave a really big code change that seemed quite unnessary, then i started a new chat and described the issue occuring in more detail and it was able to fix it with one line however this led to another bug: hints were no longer showing and game over message did not reveal secret number anymore
 ---
 
 ## 3. Debugging and testing your fixes

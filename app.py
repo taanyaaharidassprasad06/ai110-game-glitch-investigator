@@ -1,68 +1,6 @@
 import random
 import streamlit as st
-
-def get_range_for_difficulty(difficulty: str):
-    if difficulty == "Easy":
-        return 1, 20
-    if difficulty == "Normal":
-        return 1, 100
-    if difficulty == "Hard":
-        return 1, 50
-    return 1, 100
-
-
-def parse_guess(raw: str):
-    if raw is None:
-        return False, None, "Enter a guess."
-
-    if raw == "":
-        return False, None, "Enter a guess."
-
-    try:
-        if "." in raw:
-            value = int(float(raw))
-        else:
-            value = int(raw)
-    except Exception:
-        return False, None, "That is not a number."
-
-    return True, value, None
-
-
-def check_guess(guess, secret):
-    if guess == secret:
-        return "Win", "🎉 Correct!"
-
-    try:
-        if guess > secret:
-            return "Too High", "📈 Go HIGHER!"
-        else:
-            return "Too Low", "📉 Go LOWER!"
-    except TypeError:
-        g = str(guess)
-        if g == secret:
-            return "Win", "🎉 Correct!"
-        if g > secret:
-            return "Too High", "📈 Go HIGHER!"
-        return "Too Low", "📉 Go LOWER!"
-
-
-def update_score(current_score: int, outcome: str, attempt_number: int):
-    if outcome == "Win":
-        points = 100 - 10 * (attempt_number + 1)
-        if points < 10:
-            points = 10
-        return current_score + points
-
-    if outcome == "Too High":
-        if attempt_number % 2 == 0:
-            return current_score + 5
-        return current_score - 5
-
-    if outcome == "Too Low":
-        return current_score - 5
-
-    return current_score
+from logic_utils import get_range_for_difficulty, parse_guess, check_guess, update_score
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
 
@@ -78,8 +16,9 @@ difficulty = st.sidebar.selectbox(
 )
 
 attempt_limit_map = {
-    "Easy": 6,
-    "Normal": 8,
+    #FIX: Change attempt limit to make Easy have the most attempts and Hard have the least attempts
+    "Easy": 8,
+    "Normal": 6,
     "Hard": 5,
 }
 attempt_limit = attempt_limit_map[difficulty]
@@ -93,7 +32,9 @@ if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
 if "attempts" not in st.session_state:
-    st.session_state.attempts = 1
+    #FIXME: Attempts should start at 0 instead of 1 since the player has not made a guess yet
+    #FIX: Changed initial value from 1 to 0 so the first guess is counted as an attempt
+    st.session_state.attempts = 0
 
 if "score" not in st.session_state:
     st.session_state.score = 0
@@ -104,10 +45,14 @@ if "status" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = []
 
+if "feedback" not in st.session_state:
+    st.session_state.feedback = None
+
 st.subheader("Make a guess")
 
 st.info(
-    f"Guess a number between 1 and 100. "
+    #FIX: Use actual low / high values from get_range_for_difficulty instead of hardcoded 1 and 100
+    f"Guess a number between {low} and {high}. "
     f"Attempts left: {attempt_limit - st.session_state.attempts}"
 )
 
@@ -120,7 +65,9 @@ with st.expander("Developer Debug Info"):
 
 raw_guess = st.text_input(
     "Enter your guess:",
-    key=f"guess_input_{difficulty}"
+    # FIXME: Guess input does not reset properly on new game
+    # FIX: Added game_id to the key to ensure it resets properly when a new game is started
+    key=f"guess_input_{difficulty}_{st.session_state.get('game_id', 0)}"
 )
 
 col1, col2, col3 = st.columns(3)
@@ -131,10 +78,16 @@ with col2:
 with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
+#FIXME: New game button does not reset the game state properly
 if new_game:
     st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
-    st.success("New game started.")
+    st.session_state.secret = random.randint(low, high)
+    #FIX: Reset remaining game settings back to the initial state using Claude Code to ensure new game is started
+    st.session_state.status = "playing"
+    st.session_state.history = []
+    st.session_state.score = 0
+    st.session_state.feedback = None
+    st.session_state.game_id = st.session_state.get("game_id", 0) + 1
     st.rerun()
 
 if st.session_state.status != "playing":
@@ -154,16 +107,13 @@ if submit:
         st.error(err)
     else:
         st.session_state.history.append(guess_int)
+        
+        #FIXME: The game behaves inconsistently every other attempt, sometimes treating the secret as a string and sometimes as an int which results in miscounting the attempts
+        #FIX: Always pass secret as int so check_guess comparison is consistent
+        outcome, message = check_guess(guess_int, st.session_state.secret)
 
-        if st.session_state.attempts % 2 == 0:
-            secret = str(st.session_state.secret)
-        else:
-            secret = st.session_state.secret
-
-        outcome, message = check_guess(guess_int, secret)
-
-        if show_hint:
-            st.warning(message)
+        #FIX: Store hint messages in session state so they persist across reruns and can be displayed after the guess is processed
+        st.session_state.feedback = message if show_hint else None
 
         st.session_state.score = update_score(
             current_score=st.session_state.score,
@@ -185,7 +135,14 @@ if submit:
                     f"Out of attempts! "
                     f"The secret was {st.session_state.secret}. "
                     f"Score: {st.session_state.score}"
-                )
+               )
+    #FIX: Rerun the app after submitting a guess to ensure the number of attempts left / used is reflected correctly
+    # Only rerun while playing so won/lost final messages (which include the secret) are not swallowed
+    if st.session_state.status == "playing":
+        st.rerun()
+# FIX: Display feedback message after processing the guess so it persists across reruns and is not lost when the user submits a new guess
+if st.session_state.feedback:
+    st.warning(st.session_state.feedback)
 
 st.divider()
 st.caption("Built by an AI that claims this code is production-ready.")
