@@ -88,6 +88,7 @@ if new_game:
     st.session_state.score = 0
     st.session_state.feedback = None
     st.session_state.game_id = st.session_state.get("game_id", 0) + 1
+    st.success("New game started.")
     st.rerun()
 
 if st.session_state.status != "playing":
