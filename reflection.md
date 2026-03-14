@@ -1,0 +1,50 @@
+# 💭 Reflection: Game Glitch Investigator
+
+Answer each question in 3 to 5 sentences. Be specific and honest about what actually happened while you worked. This is about your process, not trying to sound perfect.
+
+## 1. What was broken when you started?
+
+- What did the game look like the first time you ran it?
+  - Simple UI, tell user how many guesses they have, has an input box to type guess, has two buttons to submit guess and start a new game, has a toggle to show hint.
+- List at least two concrete bugs you noticed at the start  
+  (for example: "the secret number kept changing" or "the hints were backwards").
+  - Hints were backwards (I guessed a number and it said 'GO LOWER' when I actually needed to 'GO HIGHER')
+  - New game button is not creating a new game to start over (Expected it to clear the input and reset the game but it does not do anything)
+  - Normal level has range 1-100 while Hard level has range 1-50 (does not really make sense as it would be expected for hard mode to be 1-100 and normal to be 1-50)
+  - Easy mode range is 1-20 but the secret number was 44 (does not make sense again as the number should stay within the range of 1-20)
+  - Game ended after certain number of attempts but still says I have one attempt remaining (not counting first attempt as an attempt)
+    - Reveals secret number even if one attempt is still left + submitting that last attempt (to make it 0) reveals a 'Game Over' message
+
+---
+
+## 2. How did you use AI as a teammate?
+
+- Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)?
+- Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
+- Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).
+
+---
+
+## 3. Debugging and testing your fixes
+
+- How did you decide whether a bug was really fixed?
+- Describe at least one test you ran (manual or using pytest)  
+  and what it showed you about your code.
+- Did AI help you design or understand any tests? How?
+
+---
+
+## 4. What did you learn about Streamlit and state?
+
+- In your own words, explain why the secret number kept changing in the original app.
+- How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
+- What change did you make that finally gave the game a stable secret number?
+
+---
+
+## 5. Looking ahead: your developer habits
+
+- What is one habit or strategy from this project that you want to reuse in future labs or projects?
+  - This could be a testing habit, a prompting strategy, or a way you used Git.
+- What is one thing you would do differently next time you work with AI on a coding task?
+- In one or two sentences, describe how this project changed the way you think about AI generated code.
